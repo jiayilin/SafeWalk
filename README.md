@@ -16,7 +16,7 @@ The challenges of the project lie in the speed of training the classifier, the a
 We plan to use SVM implementation of OpenCV (based on LibSVM) to build the classifier. Since keeping bringing in new image features and deleting old image features to maintain a certain number of images for classification can be time consuming, we come up with two approaches to speed up the process. The first one we look into is to build an online SVM classifier that trains the data incrementally. So we do not need to retrain the whole data and can only update the classifier by adding the result of the new feature.  Another approach is, instead of doing all the training online, to gather large number of the images and train them offline. So we have an offline classifier and whenever a new image come in, it can quickly give the result based on all the offline training data. We hope that by trying these two approaches, we can speed up the classification process, to quickly classify the result given a new image and respond to the user as soon as possible.
 The second challenge lies in feature detection. Since pictures are taken by the user, the pictures may be taken from different angle and the lighting environment can also change a lot from pictures to pictures. As the texture of the ground can be different from the carpet, brick to outside road, there may also be problem that when the user move from one texture of the ground to the other, the feature changes dramatically and can be classified as obstacles.  
 
-![alt tag](http://github.com/jiayilin/flowChart.png)
+![alt tag](https://github.com/jiayilin/SafeWalk/blob/master/flowChart.png)
 Note: The “Online classifier” in the flow chart is different from the “online SVM” mentioned earlier. Here the online classifier is the opposite of the offline classifier. The online classifier keeps being retrained using the images captured by the user on-the-fly while the offline version is pre-trained and doesn’t get updated during the walk. The online SVM is a different version from the standard SVM, which keeps adding new single samples and update the weights instead of batch training. Both online SVM and standard SVM are online classifiers.
 
 Goals & Deliverables
@@ -31,11 +31,18 @@ c. Build depth image from multiple images and classify based on position of the 
 Evaluation:
 Use the app in the real world and check if a. it detects obstacles with the required recall rate, b. it works in real time without delay, c. anyone can quickly learn to use the app and feel comfortable using it.
 
-Schedule
-                                  Yangming Chong                           Jiayi Lin 
-Nov 09 - Nov 15         Generate features from images        Load consecutive images from the camera
-Nov 16 - Nov 22                   (Collaboratively) Select and train the classifier
-Nov 23 - Nov 29                   (Collaboratively) Improve the speed and detection accuracy
-Nov 30 - Dec 6          Explore the online SVM               Explore the offline classifier
-Dec 07 - Dec 11         Write the report; make the video     Make the presentation; make the video
+Schedule                                             
+Nov 09 - Nov 15  
+Yangming Chong: Generate features from images 
+Jiayi Lin:      Load consecutive images from the camera
+Nov 16 - Nov 22                   
+(Collaboratively) Select and train the classifier
+Nov 23 - Nov 29                   
+(Collaboratively) Improve the speed and detection accuracy
+Nov 30 - Dec 6          
+Yangming Chong: Explore the online SVM               
+Jiayi Lin:      Explore the offline classifier
+Dec 07 - Dec 11         
+Yangming Chong: Write the report; make the video     
+Jiayi Lin:      Make the presentation; make the video
 
