@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8480AE381C03777100519C05 /* fan.JPG in Resources */ = {isa = PBXBuildFile; fileRef = 8480AE371C03777100519C05 /* fan.JPG */; settings = {ASSET_TAGS = (); }; };
+		8480AE3A1C0377BA00519C05 /* box.JPG in Resources */ = {isa = PBXBuildFile; fileRef = 8480AE391C0377BA00519C05 /* box.JPG */; settings = {ASSET_TAGS = (); }; };
+		8480AE3C1C0377F100519C05 /* chair.JPG in Resources */ = {isa = PBXBuildFile; fileRef = 8480AE3B1C0377F100519C05 /* chair.JPG */; settings = {ASSET_TAGS = (); }; };
+		8480AE401C03787400519C05 /* computer.JPG in Resources */ = {isa = PBXBuildFile; fileRef = 8480AE3F1C03787400519C05 /* computer.JPG */; settings = {ASSET_TAGS = (); }; };
 		8481F0431C01B78700D6BCFA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8481F0421C01B78700D6BCFA /* main.m */; };
 		8481F0461C01B78700D6BCFA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8481F0451C01B78700D6BCFA /* AppDelegate.m */; };
 		8481F0491C01B78800D6BCFA /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8481F0481C01B78800D6BCFA /* ViewController.mm */; };
@@ -33,6 +37,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8480AE371C03777100519C05 /* fan.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = fan.JPG; sourceTree = "<group>"; };
+		8480AE391C0377BA00519C05 /* box.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = box.JPG; sourceTree = "<group>"; };
+		8480AE3B1C0377F100519C05 /* chair.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = chair.JPG; sourceTree = "<group>"; };
+		8480AE3F1C03787400519C05 /* computer.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = computer.JPG; sourceTree = "<group>"; };
 		8481F03E1C01B78700D6BCFA /* SafeWalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SafeWalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8481F0421C01B78700D6BCFA /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		8481F0441C01B78700D6BCFA /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -113,6 +121,10 @@
 			children = (
 				8481F0681C01B7D200D6BCFA /* dictionary.txt */,
 				8481F06A1C01B7D900D6BCFA /* brick.jpg */,
+				8480AE3B1C0377F100519C05 /* chair.JPG */,
+				8480AE3F1C03787400519C05 /* computer.JPG */,
+				8480AE391C0377BA00519C05 /* box.JPG */,
+				8480AE371C03777100519C05 /* fan.JPG */,
 				8481F06C1C01B7EF00D6BCFA /* obstacle.jpg */,
 				8481F06E1C01B7F500D6BCFA /* concrete.jpg */,
 				8481F0701C01B7FC00D6BCFA /* carpet.jpg */,
@@ -213,11 +225,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				8481F0711C01B7FC00D6BCFA /* carpet.jpg in Resources */,
+				8480AE3A1C0377BA00519C05 /* box.JPG in Resources */,
 				8481F0511C01B78800D6BCFA /* LaunchScreen.storyboard in Resources */,
 				8481F04E1C01B78800D6BCFA /* Assets.xcassets in Resources */,
 				8481F06D1C01B7EF00D6BCFA /* obstacle.jpg in Resources */,
 				8481F06F1C01B7F500D6BCFA /* concrete.jpg in Resources */,
+				8480AE401C03787400519C05 /* computer.JPG in Resources */,
+				8480AE3C1C0377F100519C05 /* chair.JPG in Resources */,
 				8481F0691C01B7D200D6BCFA /* dictionary.txt in Resources */,
+				8480AE381C03777100519C05 /* fan.JPG in Resources */,
 				8481F04C1C01B78800D6BCFA /* Main.storyboard in Resources */,
 				8481F06B1C01B7D900D6BCFA /* brick.jpg in Resources */,
 			);
@@ -436,6 +452,7 @@
 				8481F0621C01B78800D6BCFA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8481F0631C01B78800D6BCFA /* Build configuration list for PBXNativeTarget "SafeWalkTests" */ = {
 			isa = XCConfigurationList;
@@ -444,6 +461,7 @@
 				8481F0651C01B78800D6BCFA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
