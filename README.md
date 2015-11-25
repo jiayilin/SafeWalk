@@ -33,9 +33,10 @@ Evaluation:
 Use the app in the real world and check if a. it detects obstacles with the required recall rate, b. it works in real time without delay, c. anyone can quickly learn to use the app and feel comfortable using it.
 
 Schedule
+
 Nov 09 - Nov 15
 Yangming Chong: Generate ORB features from the images
-Jiayi Lin:      Load consecutive images from the camera
+Jiayi Lin: Load consecutive images from the camera
 
 Nov 16 - Nov 22                   
 (Collaboratively) Select and train the bag of words classifier
@@ -48,7 +49,7 @@ Yangming Chong: Add the color channel to improve the accuracy of the algorithm
 Jiayi Lin: Connect the camera, add vibration for notification, and test it on the ipad
 
 Nov 29 to Dec 2
-Yangming Chong: Add filter bank to train the images 
+Yangming Chong: Add filter bank to train the images
 Jiayi Lin: Collect more training data and create a new dictionary
 
 Dec 3 to Dec 6
