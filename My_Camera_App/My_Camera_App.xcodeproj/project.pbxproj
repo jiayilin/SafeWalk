@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8489FFF51C0D26CA00000C57 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8489FFF41C0D26CA00000C57 /* AudioToolbox.framework */; };
 		84C107DB1BA8DC5F0092DA2D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C107DA1BA8DC5F0092DA2D /* main.m */; };
 		84C107DE1BA8DC5F0092DA2D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C107DD1BA8DC5F0092DA2D /* AppDelegate.m */; };
 		84C107E11BA8DC5F0092DA2D /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84C107E01BA8DC5F0092DA2D /* ViewController.mm */; };
@@ -31,6 +32,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8489FFF41C0D26CA00000C57 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		84C107D61BA8DC5F0092DA2D /* My_Camera_App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = My_Camera_App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84C107DA1BA8DC5F0092DA2D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		84C107DC1BA8DC5F0092DA2D /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -55,6 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8489FFF51C0D26CA00000C57 /* AudioToolbox.framework in Frameworks */,
 				84C108011BA8E4650092DA2D /* AVFoundation.framework in Frameworks */,
 				84C107FF1BA8DC9F0092DA2D /* opencv2.framework in Frameworks */,
 			);
@@ -73,6 +76,7 @@
 		84C107CD1BA8DC5F0092DA2D = {
 			isa = PBXGroup;
 			children = (
+				8489FFF41C0D26CA00000C57 /* AudioToolbox.framework */,
 				84C108001BA8E4650092DA2D /* AVFoundation.framework */,
 				84C107FE1BA8DC9F0092DA2D /* opencv2.framework */,
 				84C107D81BA8DC5F0092DA2D /* My_Camera_App */,
