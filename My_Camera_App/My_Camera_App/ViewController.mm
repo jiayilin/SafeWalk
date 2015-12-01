@@ -18,8 +18,7 @@ using namespace std;
     UIImageView *liveView_; // Live output from the camera
     UIImageView *resultView_; // Preview view of everything...
     UIImageView *imageView_;
-    UIButton *takephotoButton_, *goliveButton_; // Button to initiate OpenCV processing of image
-    CvPhotoCamera *photoCamera_; // OpenCV wrapper class to simplfy camera access through AVFoundation
+    CvVideoCamera *videoCamera;
 }
 @end
 
@@ -35,7 +34,7 @@ const cv::Scalar RED = cvScalar(0,0,255);
     
     // Do any additional setup after loading the view, typically from a nib.
     
-    // 1. Setup the your OpenCV view, so it takes up the entire App screen......
+    //Setup the your OpenCV view, so it takes up the entire App screen......
     int view_width = self.view.frame.size.width;
     int view_height = (640*view_width)/480; // Work out the viw-height assuming 640x480 input
     int view_offset = (self.view.frame.size.height - view_height)/2;
@@ -46,49 +45,35 @@ const cv::Scalar RED = cvScalar(0,0,255);
     [self.view addSubview:resultView_]; // Important: add resultView_ as a subview
     resultView_.hidden = true; // Hide the view
     
-    // 2. Setup a timmer to take a picture repeatedly
-    [NSTimer scheduledTimerWithTimeInterval:2 target:self
-                                   selector:@selector(takePicture) userInfo:nil repeats:YES];
-    
     resultView_.contentMode = UIViewContentModeScaleAspectFit;
     
-    // 3. Initialize the camera parameters and start the camera (inside the App)
-    photoCamera_ = [[CvPhotoCamera alloc] initWithParentView:liveView_];
-    photoCamera_.delegate = self;
+    // Initialize the video camera
+    videoCamera = [[CvVideoCamera alloc] initWithParentView:liveView_];
+    videoCamera.delegate = self;
     
-    // This chooses whether we use the front or rear facing camera
-    photoCamera_.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
+    videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
+    videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset640x480;
+    videoCamera.defaultAVCaptureVideoOrientation = AVCaptureVideoOrientationPortrait;
+    videoCamera.defaultFPS = 30;
+    videoCamera.rotateVideo = YES;
     
-    // This is used to set the image resolution
-    photoCamera_.defaultAVCaptureSessionPreset = AVCaptureSessionPreset640x480;
-    
-    // This is used to determine the device orientation
-    photoCamera_.defaultAVCaptureVideoOrientation = AVCaptureVideoOrientationPortrait;
-    
-    // This starts the camera capture
-    [photoCamera_ start];
-    
+    [videoCamera start];
 }
 
-//===============================================================================================
-// This member function is executed after certain time interval has pressed
-- (void)takePicture {
-    [photoCamera_ takePicture];
-}
+    int i;
 
-//===============================================================================================
-// To be compliant with the CvPhotoCameraDelegate we need to implement these two methods
-- (void)photoCamera:(CvPhotoCamera *)photoCamera capturedImage:(UIImage *)image
+- (void)processImage:(cv::Mat&)image;
 {
-    [photoCamera_ stop];
+    i++;
+    // process the image every 10 frame
+    if (i==10) {
     resultView_.hidden = false; // Turn the hidden view on
     
     //implement OpenCV code here to process images.
     
-    cv::Mat cvImage = [self cvMatFromUIImage:image];
-    cv::transpose(cvImage, cvImage);
+    cv::Mat cvImage = image;//[self cvMatFromUIImage:image];
     cv::Mat gray; cv::cvtColor(cvImage, gray, CV_RGBA2GRAY); // Convert to grayscale
-    //cv::transpose(gray, gray);
+   // cv::transpose(gray, gray);
     cout<<gray.size()<<endl;
     
     //resultView_.image = [self UIImageFromCVMat:gray];
@@ -102,38 +87,34 @@ const cv::Scalar RED = cvScalar(0,0,255);
     cv::Mat display_im1; cv::cvtColor(upper, display_im1, CV_GRAY2BGR);
     cv::Mat display_im2; cv::cvtColor(lower, display_im2, CV_GRAY2BGR);
     
-    NSDate *methodStart = [NSDate date];
     cv::Mat display_im_gray = [self calcDiff_gray:gray];
     //cv::Mat display_im_color = [self calcDiff_color:cvImage];
-    NSDate *methodFinish = [NSDate date];
-    NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
-    NSLog(@"executionTime = %f", executionTime);
+    
     
     resultView_.image = [self UIImageFromCVMat:display_im_gray];
     // Special part to ensure the image is rotated properly when the image is converted back
-    //UIImage *resImage = MatToUIImage(display_im1);
-    /*resultView_.image =  [UIImage imageWithCGImage:[resImage CGImage]
-                                             scale:1.0
-                                       orientation: UIImageOrientationLeftMirrored];
-    */
-    // After processing the captured photo, start the photoCamera and get more photos
-    cout << "finish processing" << endl;
-    resultView_.hidden = false; // Hide the result view again
-    [photoCamera_ start];
+//    UIImage *resImage = MatToUIImage(display_im_gray);
+//    resultView_.image =  [UIImage imageWithCGImage:[resImage CGImage]
+//                                             scale:1.0
+//                                       orientation: UIImageOrientationLeftMirrored];
+//    
     
+    cout << "finish processing" << endl;
+    i = 0;
+    resultView_.hidden = true; // Hide the result view again
+    }
 }
 
 
 - (cv::Mat) calcDiff_color: (cv::Mat) img {
-    //srand ( time(NULL) );
     int width = img.cols;
     int height = img.rows;
     cv::Mat upper = img(cv::Rect(0, 0, width, int(height/2)));
     cv::Mat lower = img(cv::Rect(0, int(height/2), width, int(height/2)));
     //cout<<upper<<endl;
     
-    cv::Mat display_im1 = upper; //cv::cvtColor(upper, display_im1, CV_GRAY2BGR);
-    cv::Mat display_im2 = lower; //cv::cvtColor(lower, display_im2, CV_GRAY2BGR);
+    cv::Mat display_im1 = upper;
+    cv::Mat display_im2 = lower;
     //cout<<"lower half dimensions: "<<lower.size()<<endl;
     
     int numPoint = 10;
@@ -220,7 +201,6 @@ const cv::Scalar RED = cvScalar(0,0,255);
 
 
 - (cv::Mat) calcDiff_gray: (cv::Mat) gray {
-    //srand ( time(NULL) );
     int width = gray.cols;
     int height = gray.rows;
     cv::Mat upper = gray(cv::Rect(0, 0, width, int(height/2)));
@@ -243,7 +223,6 @@ const cv::Scalar RED = cvScalar(0,0,255);
     py[1][0] = height / 4 - height / 16;
     py[1][1] = height / 4;
     py[1][2] = height / 4 + height / 16;
-    //cout<<"randx: "<<endl<<randx<<endl;
     
     
     double diff = 0;
@@ -284,7 +263,7 @@ const cv::Scalar RED = cvScalar(0,0,255);
     }
     diff = sqrt(diff / (numValid*3));
     cout<<"diff gray: "<<diff<<endl;
-    cout<<"# comps: "<<count<<", # valid points: "<<(numValid*3)<<endl<<endl;
+    //cout<<"# comps: "<<count<<", # valid points: "<<(numValid*3)<<endl<<endl;
     
     if (diff > 50){
         AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
@@ -307,6 +286,12 @@ const cv::Scalar RED = cvScalar(0,0,255);
     
     cv::Mat complete;
     cv::vconcat(display_im1, display_im2, complete);
+    
+    // Print out diff in the middle of the screen
+    cv::Point text_origin(complete.size().width*0.5 ,complete.size().height*0.95);
+    char d[10];
+    sprintf(d, "diff %f",(double)diff);
+    cv::putText(complete, d, text_origin, cv::FONT_HERSHEY_SIMPLEX, 0.8, RED);
     
     return complete;
     
