@@ -18,6 +18,7 @@
 #include <sstream>  // for istringstream
 #include <string>   // for string
 #include <fstream>
+#include <algorithm>
 #endif
 
 using namespace std;
@@ -38,7 +39,8 @@ using namespace cv;
     // Do any additional setup after loading the view, typically from a nib.
     
     // Read in the image
-    UIImage *image = [UIImage imageNamed:@"obstacle.JPG"]; // new_view.jpg and prince_book.jpg
+    //UIImage *image = [UIImage imageNamed:@"chair.JPG"]; // new_view.jpg and prince_book.jpg
+    UIImage *image = [UIImage imageNamed:@"shadow.png"];
     if(image == nil) cout << "Cannot read in the file !!" << endl;
     
     // Setup the display
@@ -56,9 +58,9 @@ using namespace cv;
     cv::Mat gray; cv::cvtColor(cvImage, gray, CV_RGBA2GRAY); // Convert to grayscale
     
     //cv::Mat blurred;
-    //cv::GaussianBlur(gray, blurred, cv::Size(17,17), 0, 0);
+    //cv::GaussianBlur(gray, gray, cv::Size(27,27), 0, 0);
     
-    int width = gray.cols;
+    /*int width = gray.cols;
     int height = gray.rows;
     cv::Mat upper = gray(cv::Rect(0, 0, width, int(height/2)));
     cv::Mat lower = gray(cv::Rect(0, int(height/2), width, int(height/2)));
@@ -175,7 +177,66 @@ using namespace cv;
         
         pt.y = py13;
         cv::circle(display_im1, pt, 10, Scalar(255,0,0), 3);
+    }*/
+    
+    vector<cv::KeyPoint> kp;
+    
+    int nfeatures = 1000;
+    int edgeThresh = 200;
+    cv::ORB orb(nfeatures, 1.2f, 8, edgeThresh);
+    cv::Mat orbDes;
+    orb(gray, cv::Mat(), kp, orbDes);
+    cout<<"orbDes size: "<<orbDes.size()<<endl;
+    
+    
+    // calculate standard variance of x and y of keypoints
+    /*double mean_x = 0, mean_y = 0, var_x = 0, var_y = 0;
+    for (int i=0; i<kp.size(); i++) {
+        mean_x += kp[i].pt.x;
+        mean_y += kp[i].pt.y;
     }
+    mean_x /= kp.size();
+    mean_y /= kp.size();
+    for (int i=0; i<kp.size(); i++) {
+        var_x += (kp[i].pt.x - mean_x) * (kp[i].pt.x - mean_x);
+        var_y += (kp[i].pt.y - mean_y) * (kp[i].pt.y - mean_y);
+    }
+    var_x /= (kp.size()-1);
+    var_y /= (kp.size()-1);
+    cout<<"std x: "<<sqrt(var_x)<<endl;
+    cout<<"std y: "<<sqrt(var_y)<<endl;*/
+    
+    
+    // calculate the histogram of distribution of x and y of keypoints
+    int numBin = 10;
+    vector<int> count_x(numBin), count_y(numBin);
+    for (int i=0; i<numBin; i++) {
+        count_x[i] = count_y[i] = 0;
+    }
+    for (int i = 0; i<kp.size(); i++) {
+        count_x[(int)(kp[i].pt.x * numBin / gray.cols)]++;
+        count_y[(int)(kp[i].pt.y * numBin / gray.rows)]++;
+    }
+    cout<<"count_x: "<<endl;
+    for (int i=0; i<numBin; i++) cout<<count_x[i]<<",";
+    cout<<endl<<"count_x max: "<<*std::max_element(std::begin(count_x), std::end(count_x));
+    cout<<endl<<"count_y: "<<endl;
+    for (int i=0; i<numBin; i++) cout<<count_y[i]<<",";
+    cout<<endl<<"count_y max: "<<*std::max_element(std::begin(count_y), std::end(count_y));
+    
+    
+    
+    
+    
+    
+    for (int i=0; i<gray.rows; i++) {
+        for (int j=0; j<gray.cols; j++) {
+            gray.at<uchar>(i,j) = gray.at<uchar>(i,j) * 0.2;
+        }
+    }
+    
+    cv::Mat display_im1; cv::cvtColor(gray, display_im1, CV_GRAY2BGR);
+    cv::drawKeypoints(display_im1, kp, display_im1);
     
     
     /*vector<cv::KeyPoint> kp1, kp2;
