@@ -37,6 +37,7 @@ const cv::Scalar RED = cvScalar(0,0,255);
     //Setup the your OpenCV view, so it takes up the entire App screen......
     int view_width = self.view.frame.size.width;
     int view_height = (640*view_width)/480; // Work out the viw-height assuming 640x480 input
+    //int view_height = (1920*view_width)/1080;
     int view_offset = (self.view.frame.size.height - view_height)/2;
     liveView_ = [[UIImageView alloc] initWithFrame:CGRectMake(0.0, view_offset, view_width, view_height)];
     [self.view addSubview:liveView_]; // Important: add liveView_ as a subview
@@ -53,6 +54,7 @@ const cv::Scalar RED = cvScalar(0,0,255);
     
     videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
     videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset640x480;
+    //videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset1920x1080;
     videoCamera.defaultAVCaptureVideoOrientation = AVCaptureVideoOrientationPortrait;
     videoCamera.defaultFPS = 30;
     videoCamera.rotateVideo = YES;
@@ -62,19 +64,24 @@ const cv::Scalar RED = cvScalar(0,0,255);
 
     int i;
 
+
 - (void)processImage:(cv::Mat&)image;
 {
     i++;
     // process the image every 10 frame
-    if (i==10) {
+    if (i==3) {
     resultView_.hidden = false; // Turn the hidden view on
     
     //implement OpenCV code here to process images.
-    
+    cv::Mat sharpenImage;
     cv::Mat cvImage = image;//[self cvMatFromUIImage:image];
+    
+    //cv::GaussianBlur(cvImage, sharpenImage, cv::Size(0,0), 23);
+    //cv::addWeighted(cvImage, 2, sharpenImage, -1, 0, sharpenImage);
+        
     cv::Mat gray; cv::cvtColor(cvImage, gray, CV_RGBA2GRAY); // Convert to grayscale
    // cv::transpose(gray, gray);
-    cout<<gray.size()<<endl;
+    //cout<<gray.size()<<endl;
     
     //resultView_.image = [self UIImageFromCVMat:gray];
     
@@ -84,21 +91,62 @@ const cv::Scalar RED = cvScalar(0,0,255);
     cv::Mat lower = gray(cv::Rect(0, int(height/2), width, int(height/2)));
     //cout<<upper<<endl;
     
-    cv::Mat display_im1; cv::cvtColor(upper, display_im1, CV_GRAY2BGR);
-    cv::Mat display_im2; cv::cvtColor(lower, display_im2, CV_GRAY2BGR);
+    //cv::Mat display_im1; cv::cvtColor(upper, display_im1, CV_GRAY2BGR);
+    //cv::Mat display_im2; cv::cvtColor(lower, display_im2, CV_GRAY2BGR);
     
-    cv::Mat display_im_gray = [self calcDiff_gray:gray];
-    //cv::Mat display_im_color = [self calcDiff_color:cvImage];
+    //cv::Mat display_im_gray = [self calcDiff_gray:gray];
+        
+        NSDate *methodStart = [NSDate date];
+        vector<cv::KeyPoint> kp;
+        
+        int nfeatures = 1000;
+        int edgeThresh = 50;
+//        cv::ORB orb(nfeatures, 1.2f, 8, edgeThresh);
+//        orb.detect(gray, kp);
+//        cv::Mat orbDes;
+//        orb(gray, cv::Mat(), kp, orbDes);
+//        cout<<"orbDes size: "<<orbDes.rows<<endl;
+        
+        cv::OrbFeatureDetector detector(nfeatures, 1.2f, 8, edgeThresh, 0);
+        detector.detect(gray, kp);
+        cout<<"kp size"<<kp.size()<<endl;
+        
+        // record execution time
+        NSDate *methodFinish = [NSDate date];
+        NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+        NSLog(@"executionTime = %f", executionTime);
+        
+        int numBin = 10;
+        vector<int> count_x(numBin), count_y(numBin);
+        for (int i=0; i<numBin; i++) {
+            count_x[i] = count_y[i] = 0;
+        }
+        for (int i = 0; i<kp.size(); i++) {
+            count_x[(int)(kp[i].pt.x * numBin / gray.cols)]++;
+            count_y[(int)(kp[i].pt.y * numBin / gray.rows)]++;
+        }
+        cout<<"count_x: "<<endl;
+        for (int i=0; i<numBin; i++) cout<<count_x[i]<<",";
+        double max_x = (double)*std::max_element(std::begin(count_x), std::end(count_x)) / kp.size();
+        double max_y = (double)*std::max_element(std::begin(count_y), std::end(count_y)) / kp.size();
+        cout<<"count_x max: "<<max_x<<endl;
+        
+        cout<<"count_y: "<<endl;
+        for (int i=0; i<numBin; i++) cout<<count_y[i]<<",";
+        cout<<"count_y max: "<<max_y<<endl;
+        
+        for (int i=0; i<gray.rows; i++) {
+            for (int j=0; j<gray.cols; j++) {
+                gray.at<uchar>(i,j) = gray.at<uchar>(i,j) * 0.2;
+            }
+        }
+        
+        cv::Mat display_im1; cv::cvtColor(gray, display_im1, CV_GRAY2BGR);
+        
+        
     
-    
-    resultView_.image = [self UIImageFromCVMat:display_im_gray];
-    // Special part to ensure the image is rotated properly when the image is converted back
-//    UIImage *resImage = MatToUIImage(display_im_gray);
-//    resultView_.image =  [UIImage imageWithCGImage:[resImage CGImage]
-//                                             scale:1.0
-//                                       orientation: UIImageOrientationLeftMirrored];
-//    
-    
+    resultView_.image = [self UIImageFromCVMat:display_im1];
+        
     cout << "finish processing" << endl;
     i = 0;
     resultView_.hidden = true; // Hide the result view again
