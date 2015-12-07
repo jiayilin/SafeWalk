@@ -16,6 +16,9 @@
 		843FE6881C0E2B5F002486FB /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 843FE6871C0E2B5F002486FB /* UIKit.framework */; };
 		843FE68A1C0E2B71002486FB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 843FE6891C0E2B71002486FB /* Foundation.framework */; };
 		8489FFF51C0D26CA00000C57 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8489FFF41C0D26CA00000C57 /* AudioToolbox.framework */; };
+		848E9CFE1C160BD7003EC0B6 /* GPUImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848E9CFD1C160BD7003EC0B6 /* GPUImage.framework */; settings = {ASSET_TAGS = (); }; };
+		848E9D001C160BFF003EC0B6 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848E9CFF1C160BFF003EC0B6 /* CoreVideo.framework */; };
+		848E9D021C160C0D003EC0B6 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848E9D011C160C0D003EC0B6 /* OpenGLES.framework */; };
 		84C107DB1BA8DC5F0092DA2D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C107DA1BA8DC5F0092DA2D /* main.m */; };
 		84C107DE1BA8DC5F0092DA2D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 84C107DD1BA8DC5F0092DA2D /* AppDelegate.m */; };
 		84C107E11BA8DC5F0092DA2D /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84C107E01BA8DC5F0092DA2D /* ViewController.mm */; };
@@ -49,6 +52,9 @@
 		843FE6871C0E2B5F002486FB /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		843FE6891C0E2B71002486FB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		8489FFF41C0D26CA00000C57 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		848E9CFD1C160BD7003EC0B6 /* GPUImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GPUImage.framework; sourceTree = "<group>"; };
+		848E9CFF1C160BFF003EC0B6 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		848E9D011C160C0D003EC0B6 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		84C107D61BA8DC5F0092DA2D /* My_Camera_App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = My_Camera_App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84C107DA1BA8DC5F0092DA2D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		84C107DC1BA8DC5F0092DA2D /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -73,11 +79,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				848E9D021C160C0D003EC0B6 /* OpenGLES.framework in Frameworks */,
+				848E9D001C160BFF003EC0B6 /* CoreVideo.framework in Frameworks */,
 				843FE68A1C0E2B71002486FB /* Foundation.framework in Frameworks */,
 				843FE6881C0E2B5F002486FB /* UIKit.framework in Frameworks */,
 				843FE6861C0E2B52002486FB /* QuartzCore.framework in Frameworks */,
 				843FE6821C0E2B43002486FB /* CoreGraphics.framework in Frameworks */,
 				843FE6831C0E2B43002486FB /* CoreImage.framework in Frameworks */,
+				848E9CFE1C160BD7003EC0B6 /* GPUImage.framework in Frameworks */,
 				843FE6841C0E2B43002486FB /* CoreMedia.framework in Frameworks */,
 				843FE67E1C0E2B2D002486FB /* AssetsLibrary.framework in Frameworks */,
 				843FE67C1C0E2B1B002486FB /* Accelerate.framework in Frameworks */,
@@ -100,6 +109,9 @@
 		84C107CD1BA8DC5F0092DA2D = {
 			isa = PBXGroup;
 			children = (
+				848E9D011C160C0D003EC0B6 /* OpenGLES.framework */,
+				848E9CFF1C160BFF003EC0B6 /* CoreVideo.framework */,
+				848E9CFD1C160BD7003EC0B6 /* GPUImage.framework */,
 				843FE6891C0E2B71002486FB /* Foundation.framework */,
 				843FE6871C0E2B5F002486FB /* UIKit.framework */,
 				843FE6851C0E2B52002486FB /* QuartzCore.framework */,

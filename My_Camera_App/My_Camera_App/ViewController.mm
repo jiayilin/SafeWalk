@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import <AudioToolbox/AudioServices.h>
+#import <GPUImage/GPUImage.h>
 
 // Include stdlib.h and std namespace so we can mix C++ code in here
 #include <stdlib.h>
@@ -62,60 +63,77 @@ const cv::Scalar RED = cvScalar(0,0,255);
     [videoCamera start];
 }
 
-    int i;
+int i;
 
 
 - (void)processImage:(cv::Mat&)image;
 {
     i++;
-    // process the image every 10 frame
-    if (i==3) {
-    resultView_.hidden = false; // Turn the hidden view on
-    
-    //implement OpenCV code here to process images.
-    cv::Mat sharpenImage;
-    cv::Mat cvImage = image;//[self cvMatFromUIImage:image];
-    
-    //cv::GaussianBlur(cvImage, sharpenImage, cv::Size(0,0), 23);
-    //cv::addWeighted(cvImage, 2, sharpenImage, -1, 0, sharpenImage);
+    // process the image every 3 frame
+    if (i==10) {
+        resultView_.hidden = false; // Turn the hidden view on
         
-    cv::Mat gray; cv::cvtColor(cvImage, gray, CV_RGBA2GRAY); // Convert to grayscale
-   // cv::transpose(gray, gray);
-    //cout<<gray.size()<<endl;
-    
-    //resultView_.image = [self UIImageFromCVMat:gray];
-    
-    int width = gray.cols;
-    int height = gray.rows;
-    cv::Mat upper = gray(cv::Rect(0, 0, width, int(height/2)));
-    cv::Mat lower = gray(cv::Rect(0, int(height/2), width, int(height/2)));
-    //cout<<upper<<endl;
-    
-    //cv::Mat display_im1; cv::cvtColor(upper, display_im1, CV_GRAY2BGR);
-    //cv::Mat display_im2; cv::cvtColor(lower, display_im2, CV_GRAY2BGR);
-    
-    //cv::Mat display_im_gray = [self calcDiff_gray:gray];
+        //implement OpenCV code here to process images.
+        cv::Mat sharpenImage;
+        cv::Mat cvImage = image;//[self cvMatFromUIImage:image];
+        
+        //cv::GaussianBlur(cvImage, sharpenImage, cv::Size(0,0), 23);
+        //cv::addWeighted(cvImage, 2, sharpenImage, -1, 0, sharpenImage);
+        
+        cv::Mat gray; cv::cvtColor(cvImage, gray, CV_RGBA2GRAY); // Convert to grayscale
+        //cout<<gray.size()<<endl;
+        
+        //resultView_.image = [self UIImageFromCVMat:gray];
+        
+        //int width = gray.cols;
+        //int height = gray.rows;
+        //cv::Mat upper = gray(cv::Rect(0, 0, width, int(height/2)));
+        //cv::Mat lower = gray(cv::Rect(0, int(height/2), width, int(height/2)));
+        //cout<<upper<<endl;
+        
+        //cv::Mat display_im1; cv::cvtColor(upper, display_im1, CV_GRAY2BGR);
+        //cv::Mat display_im2; cv::cvtColor(lower, display_im2, CV_GRAY2BGR);
         
         NSDate *methodStart = [NSDate date];
-        vector<cv::KeyPoint> kp;
         
-        int nfeatures = 1000;
-        int edgeThresh = 50;
-//        cv::ORB orb(nfeatures, 1.2f, 8, edgeThresh);
-//        orb.detect(gray, kp);
-//        cv::Mat orbDes;
-//        orb(gray, cv::Mat(), kp, orbDes);
-//        cout<<"orbDes size: "<<orbDes.rows<<endl;
+        bool ifObstacle_Diff = [self calcDiff_gray:gray];
+        if (ifObstacle_Diff) {
+            AudioServicesPlaySystemSound(1008);
+        }
+        else {
+            bool ifObstacle_ORB = [self ORBdistribution:gray];
+            if (ifObstacle_ORB) {
+                AudioServicesPlaySystemSound(1007);
+            }
+        }
         
-        cv::OrbFeatureDetector detector(nfeatures, 1.2f, 8, edgeThresh, 0);
-        detector.detect(gray, kp);
-        cout<<"kp size"<<kp.size()<<endl;
         
         // record execution time
         NSDate *methodFinish = [NSDate date];
         NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
         NSLog(@"executionTime = %f", executionTime);
+        cout<<endl;
         
+        //cv::Mat display_im1; cv::cvtColor(gray, display_im1, CV_GRAY2BGR);
+        
+
+        i = 0;
+        resultView_.hidden = true; // Hide the result view again
+    }
+}
+
+- (bool) ORBdistribution: (cv::Mat) gray {
+    double ORBratio = 0.3;
+    
+    int nfeatures = 1000;
+    int edgeThresh = 50;
+    
+    vector<cv::KeyPoint> kp;
+    cv::OrbFeatureDetector detector(nfeatures, 1.2f, 8, edgeThresh, 0);
+    detector.detect(gray, kp);
+    cout<<"kp size: "<<kp.size()<<endl;
+    
+    if (kp.size()>60) {
         int numBin = 10;
         vector<int> count_x(numBin), count_y(numBin);
         for (int i=0; i<numBin; i++) {
@@ -125,130 +143,40 @@ const cv::Scalar RED = cvScalar(0,0,255);
             count_x[(int)(kp[i].pt.x * numBin / gray.cols)]++;
             count_y[(int)(kp[i].pt.y * numBin / gray.rows)]++;
         }
-        cout<<"count_x: "<<endl;
-        for (int i=0; i<numBin; i++) cout<<count_x[i]<<",";
-        double max_x = (double)*std::max_element(std::begin(count_x), std::end(count_x)) / kp.size();
-        double max_y = (double)*std::max_element(std::begin(count_y), std::end(count_y)) / kp.size();
-        cout<<"count_x max: "<<max_x<<endl;
+        //cout<<"count_x: ";
+        //for (int i=0; i<numBin; i++) cout<<count_x[i]<<",";
         
-        cout<<"count_y: "<<endl;
-        for (int i=0; i<numBin; i++) cout<<count_y[i]<<",";
-        cout<<"count_y max: "<<max_y<<endl;
+        std::vector<int> range_x(count_x.begin() + 2, count_x.end() - 2);
+        std::vector<int> range_y(count_y.begin(), count_y.end() - 5);
         
-        for (int i=0; i<gray.rows; i++) {
-            for (int j=0; j<gray.cols; j++) {
-                gray.at<uchar>(i,j) = gray.at<uchar>(i,j) * 0.2;
-            }
-        }
+        double max_x = (double)*std::max_element(std::begin(range_x), std::end(range_x)) / kp.size();
+        double max_y = (double)*std::max_element(std::begin(range_y), std::end(range_y)) / kp.size();
+        cout<<"max_x: "<<max_x<<endl;
         
-        cv::Mat display_im1; cv::cvtColor(gray, display_im1, CV_GRAY2BGR);
+        //cout<<"count_y: ";
+        //for (int i=0; i<numBin; i++) cout<<count_y[i]<<",";
+        cout<<"max_y: "<<max_y<<endl;
         
-        
-    
-    resultView_.image = [self UIImageFromCVMat:display_im1];
-        
-    cout << "finish processing" << endl;
-    i = 0;
-    resultView_.hidden = true; // Hide the result view again
-    }
-}
-
-
-- (cv::Mat) calcDiff_color: (cv::Mat) img {
-    int width = img.cols;
-    int height = img.rows;
-    cv::Mat upper = img(cv::Rect(0, 0, width, int(height/2)));
-    cv::Mat lower = img(cv::Rect(0, int(height/2), width, int(height/2)));
-    //cout<<upper<<endl;
-    
-    cv::Mat display_im1 = upper;
-    cv::Mat display_im2 = lower;
-    //cout<<"lower half dimensions: "<<lower.size()<<endl;
-    
-    int numPoint = 10;
-    cv::Mat randx = cv::Mat::zeros(1,numPoint,CV_64FC1);
-    cv::Mat mean = cv::Mat::ones(1,1,CV_64FC1) * width / 2;
-    cv::Mat sigma= cv::Mat::ones(1,1,CV_64FC1) * width / 4;
-    cv::randn(randx,  mean, sigma);
-    int py[2][3];
-    py[0][0] = height / 16;
-    py[0][1] = height / 16 * 2;
-    py[0][2] = height / 16 * 3;
-    py[1][0] = height / 4 - height / 16;
-    py[1][1] = height / 4;
-    py[1][2] = height / 4 + height / 16;
-    //cout<<"randx: "<<endl<<randx<<endl;
-    
-    
-    double diff = 0;
-    int count = 0;
-    int numValid = numPoint;
-    for (int i=0; i<numPoint; i++) {
-        if (randx.at<float>(0,i) <= 0 || randx.at<float>(0,i) >= width - 1) {
-            numValid--;
-            continue;
-        }
-        
-        int px = randx.at<double>(0,i);
-        
-        
-        for (int j=0; j<3; j++) {
-            for (int k=0; k<3; k++) {
-                double avg1 = (int)upper.at<cv::Vec3b>(py[0][j], px).val[k]
-                + (int)upper.at<cv::Vec3b>(py[0][j]-1, px-1).val[k]
-                + (int)upper.at<cv::Vec3b>(py[0][j], px-1).val[k]
-                + (int)upper.at<cv::Vec3b>(py[0][j]+1, px-1).val[k]
-                + (int)upper.at<cv::Vec3b>(py[0][j]-1, px).val[k]
-                + (int)upper.at<cv::Vec3b>(py[0][j]+1, px).val[k]
-                + (int)upper.at<cv::Vec3b>(py[0][j]-1, px+1).val[k]
-                + (int)upper.at<cv::Vec3b>(py[0][j], px+1).val[k]
-                + (int)upper.at<cv::Vec3b>(py[0][j]+1, px+1).val[k];
-                double avg2 = (int)lower.at<cv::Vec3b>(py[1][j], px).val[k]
-                + (int)lower.at<cv::Vec3b>(py[1][j]-1, px-1).val[k]
-                + (int)lower.at<cv::Vec3b>(py[1][j], px-1).val[k]
-                + (int)lower.at<cv::Vec3b>(py[1][j]+1, px-1).val[k]
-                + (int)lower.at<cv::Vec3b>(py[1][j]-1, px).val[k]
-                + (int)lower.at<cv::Vec3b>(py[1][j]+1, px).val[k]
-                + (int)lower.at<cv::Vec3b>(py[1][j]-1, px+1).val[k]
-                + (int)lower.at<cv::Vec3b>(py[1][j], px+1).val[k]
-                + (int)lower.at<cv::Vec3b>(py[1][j]+1, px+1).val[k];
-                avg1 /= 9;
-                avg2 /= 9;
-                //cout<<"avg1: "<<avg1<<", avg2: "<<avg2<<endl;
-                diff += (avg1 - avg2) * (avg1 - avg2);
-                count++;
-            }
-        }
-    }
-    diff = sqrt(diff / (numValid*3*3));
-    cout<<"diff color: "<<diff<<endl;
-    cout<<"# comps: "<<count<<", # valid points: "<<(numValid*3*3)<<endl<<endl;
-    
-    
-    for (int i=0; i<numPoint; i++) {
-        cv::Point pt;
-        pt.x = randx.at<double>(0,i);
-        
-        for (int j=0; j<3; j++) {
-            pt.y = py[0][j];
-            cv::circle(display_im1, pt, 10, cv::Scalar(255,0,0), 3);
-            
-            pt.y = py[1][j];
-            cv::circle(display_im2, pt, 10, cv::Scalar(255,0,0), 3);
+        if (max_x > ORBratio || max_y > ORBratio) {
+            return true;
         }
     }
     
-    cv::Mat complete;
-    cv::vconcat(display_im1, display_im2, complete);
-    
-    return complete;
-    
+    return false;
 }
 
 
 
 
-- (cv::Mat) calcDiff_gray: (cv::Mat) gray {
+- (bool) extractEdges: (cv::Mat) gray {
+    return false;
+ }
+
+
+
+- (bool) calcDiff_gray: (cv::Mat) gray {
+    double alarm_thresh = 60;
+    
     int width = gray.cols;
     int height = gray.rows;
     cv::Mat upper = gray(cv::Rect(0, 0, width, int(height/2)));
@@ -257,7 +185,7 @@ const cv::Scalar RED = cvScalar(0,0,255);
     
     cv::Mat display_im1; cv::cvtColor(upper, display_im1, CV_GRAY2BGR);
     cv::Mat display_im2; cv::cvtColor(lower, display_im2, CV_GRAY2BGR);
-    cout<<"lower half dimensions: "<<lower.size()<<endl;
+    //cout<<"lower half dimensions: "<<lower.size()<<endl;
     
     int numPoint = 10;
     cv::Mat randx = cv::Mat::zeros(1,numPoint,CV_64FC1);
@@ -313,13 +241,11 @@ const cv::Scalar RED = cvScalar(0,0,255);
     cout<<"diff gray: "<<diff<<endl;
     //cout<<"# comps: "<<count<<", # valid points: "<<(numValid*3)<<endl<<endl;
     
-    if (diff > 50){
-        AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
-        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-    }
+    if (diff > alarm_thresh) return true;
+    else return false;
     
     
-    for (int i=0; i<numPoint; i++) {
+    /*for (int i=0; i<numPoint; i++) {
         cv::Point pt;
         pt.x = randx.at<double>(0,i);
         
@@ -341,7 +267,7 @@ const cv::Scalar RED = cvScalar(0,0,255);
     sprintf(d, "diff %f",(double)diff);
     cv::putText(complete, d, text_origin, cv::FONT_HERSHEY_SIMPLEX, 0.8, RED);
     
-    return complete;
+    return complete;*/
     
 }
 

@@ -5,7 +5,7 @@
 //  Created by Yangming Chong, Jiayi Lin on 11/21/15.
 //  Copyright © 2015 jiayi. All rights reserved.
 //
-
+#import <GPUImage/GPUImage.h>
 #import "ViewController.h"
 #ifdef __cplusplus
 #include <opencv2/opencv.hpp> // Includes the opencv library
@@ -39,8 +39,8 @@ using namespace cv;
     // Do any additional setup after loading the view, typically from a nib.
     
     // Read in the image
-    //UIImage *image = [UIImage imageNamed:@"chair.JPG"]; // new_view.jpg and prince_book.jpg
-    UIImage *image = [UIImage imageNamed:@"shadow.png"];
+    UIImage *image = [UIImage imageNamed:@"wall.png"]; // new_view.jpg and prince_book.jpg
+    //UIImage *image = [UIImage imageNamed:@"shadow.png"];
     if(image == nil) cout << "Cannot read in the file !!" << endl;
     
     // Setup the display
@@ -60,13 +60,13 @@ using namespace cv;
     //cv::Mat blurred;
     //cv::GaussianBlur(gray, gray, cv::Size(27,27), 0, 0);
     
-    /*int width = gray.cols;
+    int width = gray.cols;
     int height = gray.rows;
-    cv::Mat upper = gray(cv::Rect(0, 0, width, int(height/2)));
-    cv::Mat lower = gray(cv::Rect(0, int(height/2), width, int(height/2)));
+    cv::Mat upper = gray(cv::Rect(0, 0, width, int(height*3/5)));
+    //cv::Mat lower = gray(cv::Rect(0, int(height/2), width, int(height/2)));
     //cout<<upper<<endl;
     
-    cv::Mat display_im1; cv::cvtColor(upper, display_im1, CV_GRAY2BGR);
+    /*cv::Mat display_im1; cv::cvtColor(upper, display_im1, CV_GRAY2BGR);
     cv::Mat display_im2; cv::cvtColor(lower, display_im2, CV_GRAY2BGR);
     cout<<"dimensions: "<<lower.size()<<endl;
     
@@ -179,14 +179,14 @@ using namespace cv;
         cv::circle(display_im1, pt, 10, Scalar(255,0,0), 3);
     }*/
     
-    vector<cv::KeyPoint> kp;
+    /*vector<cv::KeyPoint> kp;
     
     int nfeatures = 1000;
     int edgeThresh = 200;
     cv::ORB orb(nfeatures, 1.2f, 8, edgeThresh);
     cv::Mat orbDes;
     orb(gray, cv::Mat(), kp, orbDes);
-    cout<<"orbDes size: "<<orbDes.size()<<endl;
+    cout<<"orbDes size: "<<orbDes.size()<<endl;*/
     
     
     // calculate standard variance of x and y of keypoints
@@ -208,7 +208,7 @@ using namespace cv;
     
     
     // calculate the histogram of distribution of x and y of keypoints
-    int numBin = 10;
+    /*int numBin = 10;
     vector<int> count_x(numBin), count_y(numBin);
     for (int i=0; i<numBin; i++) {
         count_x[i] = count_y[i] = 0;
@@ -236,8 +236,15 @@ using namespace cv;
     }
     
     cv::Mat display_im1; cv::cvtColor(gray, display_im1, CV_GRAY2BGR);
-    cv::drawKeypoints(display_im1, kp, display_im1);
+    cv::drawKeypoints(display_im1, kp, display_im1);*/
     
+    
+    
+    NSDate *methodStart = [NSDate date];
+    cv::Mat display_im_edge = [self extractEdges:upper];
+    NSDate *methodFinish = [NSDate date];
+    NSTimeInterval executionTime = [methodFinish timeIntervalSinceDate:methodStart];
+    NSLog(@"executionTime = %f", executionTime);
     
     /*vector<cv::KeyPoint> kp1, kp2;
     
@@ -310,9 +317,159 @@ using namespace cv;
     std::cout<<"number of key points: " << kp1.size()<< "," << kp2.size()<<endl;*/
     
     // Finally setup the view to display
-    imageView_.image = [self UIImageFromCVMat:display_im1];
+    imageView_.image = [self UIImageFromCVMat:display_im_edge];
     
 }
+
+- (cv::Mat) extractEdges: (cv::Mat) gray {
+    
+    cout<<"dimension: "<<gray.size()<<endl;
+    int lowThreshold = 30;
+    int ratio = 3;
+    int kernel_size = 3;
+    cv::Mat detected_edges, resize_im, dst, cdst;
+    
+    // resize the image
+    cv::resize(gray, resize_im, cv::Size(), 0.2, 0.2, cv::INTER_CUBIC);
+    
+    // Use Gaussian Blur to blur the image
+    cv::GaussianBlur(resize_im, detected_edges, cv::Size(7,7), 0, 0);
+    
+    // Apply Canny function
+    cv::Canny( detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size );
+    
+    // Resize back
+    cv::resize(detected_edges, detected_edges, gray.size(), 0, 0, cv::INTER_CUBIC);
+    
+    
+    cvtColor(detected_edges, cdst, CV_GRAY2BGR);
+    
+    // Apply Hough Lines
+    /*cv::vector<cv::Vec2f> lines;
+    cv::HoughLines(detected_edges, lines, 1, CV_PI/180, 800, 0, 0 );
+    
+    // Draw lines
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+        float rho = lines[i][0], theta = lines[i][1];
+        cv::Point pt1, pt2;
+        
+        double a = cos(theta), b = sin(theta);
+        double x0 = a*rho, y0 = b*rho;
+        pt1.x = cvRound(x0 + 5000*(-b));
+        pt1.y = cvRound(y0 + 5000*(a));
+        pt2.x = cvRound(x0 - 5000*(-b));
+        pt2.y = cvRound(y0 - 5000*(a));
+        cv::line( cdst, pt1, pt2, cv::Scalar(0,0,255), 3, CV_AA);
+    }*/
+    
+    // Probablistic Hough
+    int resizeFactor = 1;
+    cv::vector<cv::Vec4i> lines;
+    cv::HoughLinesP(detected_edges, lines, 1, CV_PI/180, 200, 300, 10);
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+        cv::Vec4i l = lines[i];
+        cv::line(cdst, cv::Point(l[0]/resizeFactor, l[1]/resizeFactor), cv::Point(l[2]/resizeFactor, l[3]/resizeFactor), cv::Scalar(0,0,255), 3, CV_AA);
+    }
+    
+    
+    
+    return cdst;
+
+}
+
+
+- (cv::Mat) extractEdgesGPU: (cv::Mat) gray {
+    
+    // tranform to UIImage
+    UIImage *inputImage = [self UIImageFromCVMat:gray];
+    
+    
+    // Initialize filters
+    // Grescale filter
+    GPUImagePicture *grayImageSource = [[GPUImagePicture alloc] initWithImage:inputImage];
+    GPUImageGrayscaleFilter *grayImageFilter = [[GPUImageGrayscaleFilter alloc] init];
+    
+    // Use transform to resize the image
+    GPUImageTransformFilter *resizeFilter = [[GPUImageTransformFilter alloc] init];
+    CGAffineTransform transform = CGAffineTransformMakeScale(0.2, 0.2);
+    resizeFilter.affineTransform = transform;
+    
+    // Gaussian blur filter
+    GPUImageGaussianBlurFilter *blurFilter = [[GPUImageGaussianBlurFilter alloc] init];
+    blurFilter.blurRadiusInPixels = 2;
+    blurFilter.blurPasses = 1;
+    blurFilter.texelSpacingMultiplier = 1.1;
+    
+    // Canny edge detection filter
+    GPUImageCannyEdgeDetectionFilter *cannyFilter = [[GPUImageCannyEdgeDetectionFilter alloc] init];
+    cannyFilter.upperThreshold = 0.2;
+    cannyFilter.lowerThreshold = 0.08;
+    //cannyFilter.blurRadiusInPixels = 1;
+    
+    // Use transform to resize the image back
+    GPUImageTransformFilter *backFilter = [[GPUImageTransformFilter alloc] init];
+    CGAffineTransform transformback = CGAffineTransformMakeScale(5, 5);
+    backFilter.affineTransform = transformback;
+    
+    // Daisy chain the filters together (you can add as many filters as you like)
+    [grayImageSource addTarget:grayImageFilter];
+    [grayImageFilter addTarget:resizeFilter];
+    [resizeFilter addTarget:blurFilter];
+    [blurFilter addTarget:cannyFilter];
+    [cannyFilter addTarget:backFilter];
+    [backFilter useNextFrameForImageCapture];
+    //[cannyFilter useNextFrameForImageCapture];
+    
+    // Process the image
+    [grayImageSource processImage];
+    
+    //UIImage *detected_edges_ui = [backFilter imageFromCurrentFramebuffer];
+    UIImage *detected_edges_ui = [backFilter imageFromCurrentFramebuffer];
+    
+    //cv::Mat detected_edges = [self cvMatFromUIImage:detected_edges_ui];
+    cv::Mat cdst = [self cvMatFromUIImage:detected_edges_ui];
+    cout<<"cdst channels: "<<cdst.channels()<<endl;
+    cout<<"cdst dimension: "<<cdst.size()<<endl;
+    
+    //cv::Mat cdst;
+    // Apply Hough Lines
+    //cvtColor(detected_edges, cdst, CV_GRAY2BGR);
+    
+    return cdst;
+    
+    cv::Mat detected_edges;
+    cvtColor(cdst, detected_edges, CV_RGBA2GRAY);
+    
+    cout<<"cvtcolor finished"<<endl;
+    
+    cv::vector<cv::Vec2f> lines;
+    cv::HoughLines(detected_edges, lines, 1, CV_PI/180, 400, 0, 0 );
+    
+    
+    cout<<"hough finished"<<endl;
+    
+    const cv::Scalar RED = cv::Scalar(0,0,255); // Set the RED color
+    
+    // Draw lines
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+        float rho = lines[i][0], theta = lines[i][1];
+        cv::Point pt1, pt2;
+        
+        double a = cos(theta), b = sin(theta);
+        double x0 = a*rho, y0 = b*rho;
+        pt1.x = cvRound(x0 + 5000*(-b));
+        pt1.y = cvRound(y0 + 5000*(a));
+        pt2.x = cvRound(x0 - 5000*(-b));
+        pt2.y = cvRound(y0 - 5000*(a));
+        cv::line( cdst, pt1, pt2, RED, 3, CV_AA);
+    }
+    return cdst;
+}
+
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
