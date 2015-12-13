@@ -54,8 +54,8 @@ const cv::Scalar RED = cvScalar(0,0,255);
     videoCamera.delegate = self;
     
     videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
-    videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset640x480;
-    //videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset1920x1080;
+    //videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset640x480;
+    videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset1920x1080;
     videoCamera.defaultAVCaptureVideoOrientation = AVCaptureVideoOrientationPortrait;
     videoCamera.defaultFPS = 30;
     videoCamera.rotateVideo = YES;
@@ -69,8 +69,8 @@ int i;
 - (void)processImage:(cv::Mat&)image;
 {
     i++;
-    // process the image every 3 frame
-    if (i==10) {
+    // process the image every 5 frame
+    if (i==5) {
         resultView_.hidden = false; // Turn the hidden view on
         
         //implement OpenCV code here to process images.
@@ -85,9 +85,9 @@ int i;
         
         //resultView_.image = [self UIImageFromCVMat:gray];
         
-        //int width = gray.cols;
-        //int height = gray.rows;
-        //cv::Mat upper = gray(cv::Rect(0, 0, width, int(height/2)));
+        int width = gray.cols;
+        int height = gray.rows;
+        cv::Mat upper = gray(cv::Rect(0, 0, width, int(height/2)));
         //cv::Mat lower = gray(cv::Rect(0, int(height/2), width, int(height/2)));
         //cout<<upper<<endl;
         
@@ -95,18 +95,37 @@ int i;
         //cv::Mat display_im2; cv::cvtColor(lower, display_im2, CV_GRAY2BGR);
         
         NSDate *methodStart = [NSDate date];
-        
-        bool ifObstacle_Diff = [self calcDiff_gray:gray];
-        if (ifObstacle_Diff) {
-            AudioServicesPlaySystemSound(1008);
-        }
-        else {
-            bool ifObstacle_ORB = [self ORBdistribution:gray];
-            if (ifObstacle_ORB) {
+        bool ifObstacle_hue_Diff = [self calcDiff_HSV:cvImage];
+        if (ifObstacle_hue_Diff) {
+            bool ifObstacle_Diff = [self calcDiff_gray:gray];
+            if(ifObstacle_Diff) {
                 AudioServicesPlaySystemSound(1007);
             }
+            else {
+                bool ifObstacle_ORB = [self ORBdistribution:gray];
+                if (ifObstacle_ORB) {
+                    AudioServicesPlaySystemSound(1007);
+                }
+                else {
+                    bool ifEdge = [self extractEdges:upper];
+                    if(ifEdge) {
+                        AudioServicesPlayAlertSound(1007);
+                    }
+                }
+            }
         }
-        
+        else {
+            //bool ifObstacle_ORB = [self ORBdistribution:gray];
+            //if (ifObstacle_ORB) {
+            //    AudioServicesPlaySystemSound(1007);
+            //}
+            //else {
+                //bool ifEdge = [self extractEdges:upper];
+                //if (ifEdge) {
+                //    AudioServicesPlayAlertSound(1006);
+                //}
+            //}
+        }
         
         // record execution time
         NSDate *methodFinish = [NSDate date];
@@ -169,7 +188,31 @@ int i;
 
 
 - (bool) extractEdges: (cv::Mat) gray {
-    return false;
+    int lowThreshold = 40;
+    int ratio = 3.5;
+    int kernel_size = 3;
+    cv::Mat detected_edges, resize_im, dst, cdst;
+    
+    // resize the image
+    cv::resize(gray, resize_im, cv::Size(), 0.2, 0.2, cv::INTER_CUBIC);
+    
+    // Use Gaussian Blur to blur the image
+    cv::GaussianBlur(resize_im, detected_edges, cv::Size(7,7), 0, 0);
+    
+    // Apply Canny function
+    cv::Canny( detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size );
+    
+    // Resize back
+    cv::resize(detected_edges, detected_edges, gray.size(), 0, 0, cv::INTER_CUBIC);
+    
+    cvtColor(detected_edges, cdst, CV_GRAY2BGR);
+    
+    // Probablistic Hough
+    cv::vector<cv::Vec4i> lines;
+    cv::HoughLinesP(detected_edges, lines, 1, CV_PI/180, 200, 300, 10);
+    
+    if (lines.size() > 1) return true;
+    else return false;
  }
 
 
@@ -270,6 +313,115 @@ int i;
     return complete;*/
     
 }
+
+
+
+
+- (bool) calcDiff_HSV: (cv::Mat) color {
+    double alarm_thresh = 30;
+    
+    cv::Mat blurred;
+    cv::GaussianBlur(color, blurred, cv::Size(7,7), 0, 0);
+    
+    cv::Mat img_hsv;
+    cv::cvtColor(blurred, img_hsv, CV_BGR2HSV);
+    cv::Mat planes[3];
+    split(img_hsv,planes);
+    
+    int width = planes[0].cols;
+    int height = planes[0].rows;
+    cv::Mat upper = planes[0](cv::Rect(0, 0, width, int(height/2)));
+    cv::Mat lower = planes[0](cv::Rect(0, int(height/2), width, int(height/2)));
+    //cout<<upper<<endl;
+    
+    cv::Mat display_im1; cv::cvtColor(upper, display_im1, CV_GRAY2BGR);
+    cv::Mat display_im2; cv::cvtColor(lower, display_im2, CV_GRAY2BGR);
+    //cout<<"lower half dimensions: "<<lower.size()<<endl;
+    
+    int numPoint = 10;
+    cv::Mat randx = cv::Mat::zeros(1,numPoint,CV_64FC1);
+    cv::Mat mean = cv::Mat::ones(1,1,CV_64FC1) * width / 2;
+    cv::Mat sigma= cv::Mat::ones(1,1,CV_64FC1) * width / 4;
+    cv::randn(randx,  mean, sigma);
+    int py[2][3];
+    py[0][0] = height / 16;
+    py[0][1] = height / 16 * 2;
+    py[0][2] = height / 16 * 3;
+    py[1][0] = height / 4 - height / 16;
+    py[1][1] = height / 4;
+    py[1][2] = height / 4 + height / 16;
+    
+    
+    double diff = 0;
+    int count = 0;
+    int numValid = numPoint;
+    for (int i=0; i<numPoint; i++) {
+        if (randx.at<float>(0,i) <= 0 || randx.at<float>(0,i) >= width - 1) {
+            numValid--;
+            continue;
+        }
+        
+        int px = randx.at<double>(0,i);
+        
+        for (int j=0; j<3; j++) {
+            double avg1 = (int)upper.at<uchar>(py[0][j], px)
+            + (int)upper.at<uchar>(py[0][j]-1, px-1)
+            + (int)upper.at<uchar>(py[0][j], px-1)
+            + (int)upper.at<uchar>(py[0][j]+1, px-1)
+            + (int)upper.at<uchar>(py[0][j]-1, px)
+            + (int)upper.at<uchar>(py[0][j]+1, px)
+            + (int)upper.at<uchar>(py[0][j]-1, px+1)
+            + (int)upper.at<uchar>(py[0][j], px+1)
+            + (int)upper.at<uchar>(py[0][j]+1, px+1);
+            double avg2 = (int)lower.at<uchar>(py[1][j], px)
+            + (int)lower.at<uchar>(py[1][j]-1, px-1)
+            + (int)lower.at<uchar>(py[1][j], px-1)
+            + (int)lower.at<uchar>(py[1][j]+1, px-1)
+            + (int)lower.at<uchar>(py[1][j]-1, px)
+            + (int)lower.at<uchar>(py[1][j]+1, px)
+            + (int)lower.at<uchar>(py[1][j]-1, px+1)
+            + (int)lower.at<uchar>(py[1][j], px+1)
+            + (int)lower.at<uchar>(py[1][j]+1, px+1);
+            avg1 /= 9;
+            avg2 /= 9;
+            diff += (avg1 - avg2) * (avg1 - avg2);
+            count++;
+        }
+    }
+    diff = sqrt(diff / (numValid*3));
+    cout<<"diff H: "<<diff<<endl;
+    //cout<<"# comps: "<<count<<", # valid points: "<<(numValid*3)<<endl<<endl;
+    
+    if (diff > alarm_thresh) return true;
+    else return false;
+    
+    
+    /*for (int i=0; i<numPoint; i++) {
+     cv::Point pt;
+     pt.x = randx.at<double>(0,i);
+     
+     for (int j=0; j<3; j++) {
+     pt.y = py[0][j];
+     cv::circle(display_im1, pt, 10, cv::Scalar(255,0,0), 3);
+     
+     pt.y = py[1][j];
+     cv::circle(display_im2, pt, 10, cv::Scalar(255,0,0), 3);
+     }
+     }
+     
+     cv::Mat complete;
+     cv::vconcat(display_im1, display_im2, complete);
+     
+     // Print out diff in the middle of the screen
+     cv::Point text_origin(complete.size().width*0.5 ,complete.size().height*0.95);
+     char d[10];
+     sprintf(d, "diff %f",(double)diff);
+     cv::putText(complete, d, text_origin, cv::FONT_HERSHEY_SIMPLEX, 0.8, RED);
+     
+     return complete;*/
+    
+}
+
 
 
 

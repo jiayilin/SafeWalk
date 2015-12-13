@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "84C107D51BA8DC5F0092DA2D"
-               BuildableName = "My_Camera_App.app"
+               BuildableName = "SafeWalk.app"
                BlueprintName = "My_Camera_App"
                ReferencedContainer = "container:My_Camera_App.xcodeproj">
             </BuildableReference>
@@ -43,7 +43,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "84C107D51BA8DC5F0092DA2D"
-            BuildableName = "My_Camera_App.app"
+            BuildableName = "SafeWalk.app"
             BlueprintName = "My_Camera_App"
             ReferencedContainer = "container:My_Camera_App.xcodeproj">
          </BuildableReference>
@@ -52,7 +52,7 @@
       </AdditionalOptions>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -66,7 +66,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "84C107D51BA8DC5F0092DA2D"
-            BuildableName = "My_Camera_App.app"
+            BuildableName = "SafeWalk.app"
             BlueprintName = "My_Camera_App"
             ReferencedContainer = "container:My_Camera_App.xcodeproj">
          </BuildableReference>
@@ -85,7 +85,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "84C107D51BA8DC5F0092DA2D"
-            BuildableName = "My_Camera_App.app"
+            BuildableName = "SafeWalk.app"
             BlueprintName = "My_Camera_App"
             ReferencedContainer = "container:My_Camera_App.xcodeproj">
          </BuildableReference>

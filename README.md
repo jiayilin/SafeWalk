@@ -3,8 +3,11 @@ Title:
 SafeWalk
 Yangming Chong (yangminc) Jiayi Lin (jiayilin)
 
+Youtube link:
+https://www.youtube.com/watch?v=vcMwC26Ra6I&feature=youtu.be
+
 Summary:
-In this project we plan to use the front camera to capture the images of the ground and send notification to alert the user if there are obstacles on the way. We plan to use statistical method to detect the feature of the ground and compare the current feature with the statistic result. For feature detection, we plan on employing ORB from OpenCV to speed up the process to run in real time. For classification, we want to explore online SVM to update the feature dictionary incrementally and classify the result based on all the statistic information. We want to provide alert to the user in two seconds if an obstacle is detected to make sure the user can walk safely.  
+In this project we propose a framework to use the back camera on a mobile device to detect obstacles on the ground and alert the visually impaired user. We use statistical method to compare the newly captured scene with the floor in a previous step. The intensity of grayscale pixels, the hue of the objects and the distribution of ORB keypoints are explored and used as statistics. An edge detector is also used to increase the robustness of the framework in highly similar environments. The accuracy, running time and robustness of the framework are tested and discussed. We managed to achieve a high frame rate as the algorithm has to run in real time when the user is walking at a certain speed. A learning based method is also implemented as a baseline to compare with our framework.  
 
 Background
 The visually impaired people have to use their guide canes to detect obstacles when they are walking on the street or inside buildings. It’s surprising that there’s no available mobile phone applications to assist the visually impaired people to avoid obstacle. With the resolution of cell phone cameras being higher and the mobile CPUs being more powerful, a mobile safe walking assistance solution becomes possible. 
@@ -12,13 +15,14 @@ The user just needs to hold the cell phone at a comfortable height in front him/
 Our application involves utilizing the OpenCV framework for iOS, accessing the camera and reading from the IMU. OpenCV provides us easy-to-use feature detector and extractors such as ORB, as well as classifiers such as SVM. We will build these algorithms into a pipeline to realize the full functions. When estimating the distance from the obstacle, the IMU data can be useful because it tells us the walking speed of the user and the height of the cell phone. 
 
 Challenge
-The challenges of the project lie in the speed of training the classifier, the accuracy and the robustness of the feature detection.
-We plan to use SVM implementation of OpenCV (based on LibSVM) to build the classifier. Since keeping bringing in new image features and deleting old image features to maintain a certain number of images for classification can be time consuming, we come up with two approaches to speed up the process. The first one we look into is to build an online SVM classifier that trains the data incrementally. So we do not need to retrain the whole data and can only update the classifier by adding the result of the new feature.  Another approach is, instead of doing all the training online, to gather large number of the images and train them offline. So we have an offline classifier and whenever a new image come in, it can quickly give the result based on all the offline training data. We hope that by trying these two approaches, we can speed up the classification process, to quickly classify the result given a new image and respond to the user as soon as possible.
-The second challenge lies in feature detection. Since pictures are taken by the user, the pictures may be taken from different angle and the lighting environment can also change a lot from pictures to pictures. As the texture of the ground can be different from the carpet, brick to outside road, there may also be problem that when the user move from one texture of the ground to the other, the feature changes dramatically and can be classified as obstacles.  
+Obstacle detection using a monocular camera is a difficult task in real daily settings due to the highly diverse appearance of the ground and objects. Different ground patterns include tiles, concrete, marble, carpet (numerous patterns inside this), wooden floor, etc. Obstacles include pedestrians, vehicles, still objects, walls, stairs, gaps or holes, etc. Thus, a robust algorithm is needed to deal with most, if not all, of these cases.
+Another challenge lies in the speed of the mobile application. Assume the person walks at the speed of 0.5 m/s, the camera sees 2 meters in front of the user, and the user needs to be alerted more than 1 meter away from the obstacle to avoid danger. Then the algorithm has to be able to detect the obstacle in less than 2 seconds. In real situations, due to the blur of the moving camera and the size of the obstacle, a running time less than 0.5 second is needed for good user experience. 
 
-![alt tag](https://github.com/jiayilin/SafeWalk/blob/master/flowChart.png)
+Thus, we did a large number of tests in various environments and develop a four-layer framework as shown in the figure below to address the challenges discussed above. They are non-learning based methods. This saves us the complexity of training a model and also makes each of the four layers extremely fast. They are executed only if certain conditions are met, so that the actual running time is very little.
+The contribution of the project does not lie in any novel mathematical algorithm or hardware acceleration technique. Instead, we developed a fast obstacle detection framework that leverages some modern algorithms, which can solve a practical problem. We hope our method of combining several separate algorithms and optimize them for a real-world problem could inspire other people to develop better algorithms or applications to facilitate people’s daily life.
 
-Note: The “Online classifier” in the flow chart is different from the “online SVM” mentioned earlier. Here the online classifier is the opposite of the offline classifier. The online classifier keeps being retrained using the images captured by the user on-the-fly while the offline version is pre-trained and doesn’t get updated during the walk. The online SVM is a different version from the standard SVM, which keeps adding new single samples and update the weights instead of batch training. Both online SVM and standard SVM are online classifiers.
+![alt tag](https://github.com/jiayilin/SafeWalk/blob/master/structure.png)
+
 
 Goals & Deliverables
 Plan to achieve: a. Finish the pipeline shown in the flow chart without the offline classifier. 
@@ -54,7 +58,7 @@ Jiayi Lin: Collect more training data and create a new dictionary
 
 Dec 3 to Dec 6                   
 Yangming Chong: Adjust the algorithm to be turning-safe                   
-Jiayi Lin: Create a user-friendly interface with voice notification
+Jiayi Lin: Create a user-friendly interface 
 
 Dec 7 to Dec 10                   
 Yangming Chong: Make the video; Write the report                   

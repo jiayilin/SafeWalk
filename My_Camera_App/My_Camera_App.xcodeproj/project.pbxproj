@@ -55,7 +55,7 @@
 		848E9CFD1C160BD7003EC0B6 /* GPUImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GPUImage.framework; sourceTree = "<group>"; };
 		848E9CFF1C160BFF003EC0B6 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		848E9D011C160C0D003EC0B6 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
-		84C107D61BA8DC5F0092DA2D /* My_Camera_App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = My_Camera_App.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		84C107D61BA8DC5F0092DA2D /* SafeWalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SafeWalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84C107DA1BA8DC5F0092DA2D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		84C107DC1BA8DC5F0092DA2D /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		84C107DD1BA8DC5F0092DA2D /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -132,7 +132,7 @@
 		84C107D71BA8DC5F0092DA2D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				84C107D61BA8DC5F0092DA2D /* My_Camera_App.app */,
+				84C107D61BA8DC5F0092DA2D /* SafeWalk.app */,
 				84C107EF1BA8DC5F0092DA2D /* My_Camera_AppTests.xctest */,
 			);
 			name = Products;
@@ -190,7 +190,7 @@
 			);
 			name = My_Camera_App;
 			productName = My_Camera_App;
-			productReference = 84C107D61BA8DC5F0092DA2D /* My_Camera_App.app */;
+			productReference = 84C107D61BA8DC5F0092DA2D /* SafeWalk.app */;
 			productType = "com.apple.product-type.application";
 		};
 		84C107EE1BA8DC5F0092DA2D /* My_Camera_AppTests */ = {
@@ -416,7 +416,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "jiayi.My-Camera-App";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = SafeWalk;
 			};
 			name = Debug;
 		};
@@ -433,7 +433,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "jiayi.My-Camera-App";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = SafeWalk;
 			};
 			name = Release;
 		};
